@@ -6,7 +6,7 @@ from Configuration.Eras.Modifier_run2_HF_2017_cff import run2_HF_2017
 from Configuration.Eras.Modifier_run3_HB_cff import run3_HB
 
 LSParameter =cms.untracked.PSet(
-HcalFeatureHFEMBit= cms.bool(False),
+    HcalFeatureHFEMBit= cms.bool(True),
 Min_Long_Energy= cms.double(10),#makes a cut based on energy deposited in short vrs long
     Min_Short_Energy= cms.double(10),
     Long_vrs_Short_Slope= cms.double(100.2),
