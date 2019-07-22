@@ -188,6 +188,8 @@ L1GenTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
       if ((parentID != p.pdgId()) &&
 	  ((parentID > -9999) 
 	   || (abs(id) == 11)
+	   || (abs(id) == 111)
+	   || (abs(id) == 211)
 	   || (abs(id) == 13)
 	   || (abs(id) == 23)
 	   || (abs(id) == 24)
