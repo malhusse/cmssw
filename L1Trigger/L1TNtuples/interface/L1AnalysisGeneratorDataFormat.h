@@ -36,6 +36,7 @@ namespace L1Analysis
      partPhi.resize(0);
      partE.resize(0);
      partCh.resize(0);
+     partFromHard.resize(0);
 
      nJet = 0;     
      jetPt.resize(0);
@@ -62,7 +63,8 @@ namespace L1Analysis
     std::vector<float> partPhi;
     std::vector<float> partE;
     std::vector<int> partCh;
-    
+    std::vector<bool> partFromHard;
+
     int nJet;
     std::vector<float> jetPt;
     std::vector<float> jetEta;
