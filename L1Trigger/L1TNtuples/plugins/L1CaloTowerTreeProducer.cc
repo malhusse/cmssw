@@ -52,10 +52,12 @@ Implementation:
 
 #include "DataFormats/EcalDigi/interface/EcalDigiCollections.h"
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
+#include "DataFormats/HcalDigi/interface/HcalUpgradeTriggerPrimitiveDigi.h"
 
 #include "DataFormats/L1TCalorimeter/interface/CaloTower.h"
 #include "DataFormats/L1TCalorimeter/interface/CaloCluster.h"
-
+#include "Geometry/CaloTopology/interface/HcalTopology.h"
+#include "L1Trigger/L1TNtuples/interface/HcalTPCoordMapUtils.h"
 
 //
 // class declaration
@@ -93,7 +95,8 @@ private:
 
   // EDM input tags
   edm::EDGetTokenT<EcalTrigPrimDigiCollection> ecalToken_;
-  edm::EDGetTokenT<HcalTrigPrimDigiCollection> hcalToken_;
+  // edm::EDGetTokenT<HcalTrigPrimDigiCollection> hcalToken_;
+  edm::EDGetTokenT<HcalUpgradeTrigPrimDigiCollection> hcalToken_;  
   edm::EDGetTokenT<l1t::CaloTowerBxCollection> l1TowerToken_;
   edm::EDGetTokenT<l1t::CaloClusterBxCollection> l1ClusterToken_;
 
@@ -106,7 +109,10 @@ L1CaloTowerTreeProducer::L1CaloTowerTreeProducer(const edm::ParameterSet& iConfi
 {
 
   ecalToken_ = consumes<EcalTrigPrimDigiCollection>(iConfig.getUntrackedParameter<edm::InputTag>("ecalToken"));
-  hcalToken_ = consumes<HcalTrigPrimDigiCollection>(iConfig.getUntrackedParameter<edm::InputTag>("hcalToken"));
+  // hcalToken_ = consumes<HcalTrigPrimDigiCollection>(iConfig.getUntrackedParameter<edm::InputTag>("hcalToken"));
+  hcalToken_ = consumes<HcalUpgradeTrigPrimDigiCollection>(iConfig.getUntrackedParameter<edm::InputTag>("hcalToken"));
+  // hcalToken_ = consumes<HcalUpgradeTrigPrimDigiCollection>(edm::InputTag("simHcalTriggerPrimitiveDigis"));
+
   l1TowerToken_ = consumes<l1t::CaloTowerBxCollection>(iConfig.getUntrackedParameter<edm::InputTag>("l1TowerToken"));
 
   edm::InputTag clusterTag = iConfig.getUntrackedParameter<edm::InputTag>("l1ClusterToken");
@@ -161,7 +167,8 @@ L1CaloTowerTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup
   iSetup.get<CaloTPGRecord>().get(decoder);
 
   edm::Handle<EcalTrigPrimDigiCollection> ecalTPs;
-  edm::Handle<HcalTrigPrimDigiCollection> hcalTPs;
+  // edm::Handle<HcalTrigPrimDigiCollection> hcalTPs;
+  edm::Handle<HcalUpgradeTrigPrimDigiCollection> hcalTPs;
 
   iEvent.getByToken(ecalToken_, ecalTPs);
   iEvent.getByToken(hcalToken_, hcalTPs);
@@ -196,6 +203,9 @@ L1CaloTowerTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup
     edm::LogWarning("L1TNtuple") << "ECAL TPs not found, branch will not be filled";
   }
   
+  edm::ESHandle<HcalTopology> hcalTopology;
+  iSetup.get<HcalRecNumberingRecord>().get(hcalTopology);
+  const HcalTopology* theHcalTopology = hcalTopology.product();
   
   if (hcalTPs.isValid()) {
       
@@ -204,16 +214,28 @@ L1CaloTowerTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup
       int ver = itr.id().version();
       short ieta = (short) itr.id().ieta();
       unsigned short absIeta = (unsigned short) abs(ieta);
-      //      short sign = ieta/absIeta;
+      short sign = ieta/absIeta;
       
       unsigned short cal_iphi = (unsigned short) itr.id().iphi();
       unsigned short iphi = (72 + 18 - cal_iphi) % 72;
       
       unsigned short compEt = itr.SOI_compressedEt();
       double et = decoder->hcaletValue(itr.id(), itr.t0());
+      //      std::cout << "is crash happen here?" << std::endl;
+      // double et = decoder->hcaletValue(ieta, iphi, ver, compEt);
 
       unsigned short fineGrain = (unsigned short) itr.SOI_fineGrain();
-      
+
+
+      std::pair<double,double> etasGeo = (absIeta < 29) ? theHcalTopology->etaRange(HcalBarrel, ieta)
+                                                        : theHcalTopology->etaRange(HcalForward, ieta);
+
+      double eta1 = etasGeo.first * sign;
+      double eta2 = etasGeo.second * sign;
+      float etaGeo = ((eta1 + eta2) / 2.);
+
+      std::pair<float, float> shortLongEnergies = itr.t0().getShortLongEns();
+
       if (compEt > 0 && (absIeta<29 || ver==1)) {
 	caloTPData_->hcalTPieta.push_back( ieta );
 	caloTPData_->hcalTPCaliphi.push_back( cal_iphi );
@@ -221,6 +243,12 @@ L1CaloTowerTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup
 	caloTPData_->hcalTPet.push_back( et );
 	caloTPData_->hcalTPcompEt.push_back( compEt );
 	caloTPData_->hcalTPfineGrain.push_back( fineGrain );
+  caloTPData_->hcalTPeta.push_back(etaGeo);
+  caloTPData_->hcalTPetaFunc.push_back(etaVal(ieta));
+  caloTPData_->hcalTPphi.push_back(iphi2phi_map[iphi]);
+  caloTPData_->hcalTPphiFunc.push_back(phiVal(iphi));
+  caloTPData_->hcalTPshortFiberE.push_back(shortLongEnergies.first);
+  caloTPData_->hcalTPlongFiberE.push_back(shortLongEnergies.second);
 	caloTPData_->nHCALTP++;
       }
     }

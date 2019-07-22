@@ -44,6 +44,7 @@ private:
 
   bool upgrade_;
   bool legacy_;
+  bool upgradeShortLong_;
 
   bool HFEMB_;
   edm::ParameterSet LongShortCut_;

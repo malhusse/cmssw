@@ -149,6 +149,19 @@ HcalTriggerPrimitiveSample CaloTPGTranscoderULUT::hcalCompress(const HcalTrigTow
   return HcalTriggerPrimitiveSample(outputLUT_[itower][sample], fineGrain);
 }
 
+HcalUpgradeTriggerPrimitiveSample CaloTPGTranscoderULUT::hcalUpgradeCompress(const HcalTrigTowerDetId& id, unsigned int sample, int fineGrain, std::pair<float,float> shortLongEnergy) const {
+   unsigned int itower = getOutputLUTId(id);
+
+  if (sample >= getOutputLUTSize(id))
+    throw cms::Exception("Out of Range")
+       << "LUT has " << getOutputLUTSize(id) << " entries for " << id << " but " << sample << " was requested.";
+
+  if(itower >= outputLUT_.size())
+    throw cms::Exception("Out of Range") << "No decompression LUT found for " << id;
+
+  return HcalUpgradeTriggerPrimitiveSample(outputLUT_[itower][sample], fineGrain, shortLongEnergy);
+}
+
 double CaloTPGTranscoderULUT::hcaletValue(const int& ieta, const int& iphi, const int& version, const int& compET) const {
   double etvalue = 0.;
   int itower = getOutputLUTId(ieta,iphi, version);
@@ -163,6 +176,13 @@ double CaloTPGTranscoderULUT::hcaletValue(const int& ieta, const int& iphi, cons
 }
 
 double CaloTPGTranscoderULUT::hcaletValue(const HcalTrigTowerDetId& hid, const HcalTriggerPrimitiveSample& hc) const {
+  int compET = hc.compressedEt();	// to be within the range by the class
+  int itower = getOutputLUTId(hid);
+  double etvalue = hcaluncomp_[itower][compET];
+  return etvalue;
+}
+
+double CaloTPGTranscoderULUT::hcaletValue(const HcalTrigTowerDetId& hid, const HcalUpgradeTriggerPrimitiveSample& hc) const {
   int compET = hc.compressedEt();	// to be within the range by the class
   int itower = getOutputLUTId(hid);
   double etvalue = hcaluncomp_[itower][compET];

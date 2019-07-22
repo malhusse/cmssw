@@ -26,6 +26,12 @@ namespace L1Analysis
       hcalTPet.clear();
       hcalTPcompEt.clear();
       hcalTPfineGrain.clear();
+      hcalTPshortFiberE.clear();
+      hcalTPlongFiberE.clear();
+      hcalTPeta.clear();
+      hcalTPetaFunc.clear();
+      hcalTPphi.clear();
+      hcalTPphiFunc.clear();
       nECALTP = 0;
       ecalTPieta.clear();
       ecalTPiphi.clear();
@@ -47,6 +53,12 @@ namespace L1Analysis
     std::vector<float> hcalTPet;
     std::vector<short> hcalTPcompEt;
     std::vector<short> hcalTPfineGrain;
+    std::vector<float> hcalTPeta;
+    std::vector<float> hcalTPetaFunc;
+    std::vector<float> hcalTPphi;
+    std::vector<float> hcalTPphiFunc;
+    std::vector<float> hcalTPshortFiberE;
+    std::vector<float> hcalTPlongFiberE;
 
     short nECALTP;
     std::vector<short> ecalTPieta;

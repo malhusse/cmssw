@@ -25,6 +25,17 @@ class HcalFeatureHFEMBit : public HcalFeatureBit {
             const HFDataFrame& shortDigi,
             const HFDataFrame& longDigi,
             int idx) const override;
+      std::pair<float, float> getShortLongEnergies(
+            const QIE10DataFrame& short1,
+            const QIE10DataFrame& short2,
+            const QIE10DataFrame& long1,
+            const QIE10DataFrame& long2,
+            bool validShort1,
+            bool validShort2,
+            bool validLong1,
+            bool validLong2,
+            int idx) const override;
+      
    private:
       template<typename T>
       float getE(const T& f, int idx) const;

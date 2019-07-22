@@ -22,6 +22,7 @@ public:
                         const std::string& decompressionFile="");
   ~CaloTPGTranscoderULUT() override;
   HcalTriggerPrimitiveSample hcalCompress(const HcalTrigTowerDetId& id, unsigned int sample, int fineGrain) const override;
+  HcalUpgradeTriggerPrimitiveSample hcalUpgradeCompress(const HcalTrigTowerDetId& id, unsigned int sample, int fineGrain, std::pair<float,float> shortLongEnergy) const override;
   EcalTriggerPrimitiveSample ecalCompress(const EcalTrigTowerDetId& id, unsigned int sample, bool fineGrain) const override;
 
   void rctEGammaUncompress(const HcalTrigTowerDetId& hid, const HcalTriggerPrimitiveSample& hc,
@@ -32,6 +33,8 @@ public:
 				   unsigned int& et) const override;
   double hcaletValue(const int& ieta, const int& iphi, const int& version, const int& compressedValue) const override;
   double hcaletValue(const HcalTrigTowerDetId& hid, const HcalTriggerPrimitiveSample& hc) const override;
+  double hcaletValue(const HcalTrigTowerDetId& hid, const HcalUpgradeTriggerPrimitiveSample& hc) const override;
+
   virtual bool HTvalid(const int ieta, const int iphi, const int version) const;
   virtual const std::vector<unsigned int> getCompressionLUT(const HcalTrigTowerDetId& id) const;
   virtual void setup(HcalLutMetadata const&, HcalTrigTowerGeometry const&,

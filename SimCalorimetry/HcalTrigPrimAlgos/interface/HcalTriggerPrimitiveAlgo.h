@@ -31,11 +31,12 @@ public:
                            uint32_t minSignalThreshold=0, uint32_t PMT_NoiseThreshold=0);
   ~HcalTriggerPrimitiveAlgo();
 
-  template<typename... Digis>
+//   template<typename... Digis>
+  template<typename... Digis, typename TPColl>
   void run(const HcalTPGCoder* incoder,
            const HcalTPGCompressor* outcoder,
            const HcalDbService* conditions,
-           HcalTrigPrimDigiCollection& result,
+           TPColl& result,
            const HcalTrigTowerGeometry* trigTowerGeometry,
            float rctlsb, const HcalFeatureBit* LongvrsShortCut,
            const Digis&... digis);
@@ -90,10 +91,16 @@ public:
 
   /// adds the actual digis
   void analyze(IntegerCaloSamples & samples, HcalTriggerPrimitiveDigi & result);
+  void analyze(IntegerCaloSamples & samples, HcalUpgradeTriggerPrimitiveDigi & result);
+
   // 2017 and later: QIE11
   void analyzeQIE11(IntegerCaloSamples& samples, HcalTriggerPrimitiveDigi& result, const HcalFinegrainBit& fg_algo);
+  void analyzeQIE11(IntegerCaloSamples& samples, HcalUpgradeTriggerPrimitiveDigi& result, const HcalFinegrainBit& fg_algo);
+
   // Version 0: RCT
   void analyzeHF(IntegerCaloSamples & samples, HcalTriggerPrimitiveDigi & result, const int hf_lumi_shift);
+  void analyzeHF(IntegerCaloSamples & samples, HcalUpgradeTriggerPrimitiveDigi & result, const int hf_lumi_shift);
+
   // Version 1: 1x1
   void analyzeHF2016(
           const IntegerCaloSamples& SAMPLES,
@@ -105,6 +112,12 @@ public:
   void analyzeHFQIE10(
           const IntegerCaloSamples& SAMPLES,
           HcalTriggerPrimitiveDigi& result,
+          const int HF_LUMI_SHIFT,
+          const HcalFeatureBit* HCALFEM
+          );
+  void analyzeHFQIE10(
+          const IntegerCaloSamples& SAMPLES,
+          HcalUpgradeTriggerPrimitiveDigi& result,
           const int HF_LUMI_SHIFT,
           const HcalFeatureBit* HCALFEM
           );
@@ -215,11 +228,12 @@ public:
   static const int QIE11_MAX_LINEARIZATION_ET = 0x7FF;
 };
 
-template<typename... Digis>
+// template<typename... Digis>
+template<typename... Digis, typename TPColl>
 void HcalTriggerPrimitiveAlgo::run(const HcalTPGCoder* incoder,
                                    const HcalTPGCompressor* outcoder,
                                    const HcalDbService* conditions,
-                                   HcalTrigPrimDigiCollection& result,
+                                   TPColl& result,
                                    const HcalTrigTowerGeometry* trigTowerGeometry,
                                    float rctlsb, const HcalFeatureBit* LongvrsShortCut,
                                    const Digis&... digis) {
@@ -251,16 +265,17 @@ void HcalTriggerPrimitiveAlgo::run(const HcalTPGCoder* incoder,
    // VME produces additional bits on the front used by lumi but not the
    // trigger, this shift corrects those out by right shifting over them.
    for (auto& item: theSumMap) {
-      result.push_back(HcalTriggerPrimitiveDigi(item.first));
+      result.push_back((typename TPColl::value_type)(item.first));
       HcalTrigTowerDetId detId(item.second.id());
       if(detId.ietaAbs() >= theTrigTowerGeometry->firstHFTower(detId.version())) { 
          if (detId.version() == 0) {
-            analyzeHF(item.second, result.back(), RCTScaleShift);
+            // analyzeHF(item.second, result.back(), RCTScaleShift);
          } else if (detId.version() == 1) {
-            if (upgrade_hf_)
+            if (upgrade_hf_){
                analyzeHFQIE10(item.second, result.back(), NCTScaleShift, LongvrsShortCut);
-            else
-               analyzeHF2016(item.second, result.back(), NCTScaleShift, LongvrsShortCut);
+            }
+            else{}
+               // analyzeHF2016(item.second, result.back(), NCTScaleShift, LongvrsShortCut);
          } else {
             // Things are going to go poorly
          }
