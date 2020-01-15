@@ -21,7 +21,7 @@ caloStage2Params.regionPUSParams  = cms.vdouble()
 
 # EG
 caloStage2Params.egLsb                      = cms.double(0.5)
-caloStage2Params.egEtaCut                   = cms.int32(28)
+caloStage2Params.egEtaCut                   = cms.int32(41)
 caloStage2Params.egSeedThreshold            = cms.double(2.)
 caloStage2Params.egNeighbourThreshold       = cms.double(1.)
 caloStage2Params.egHcalThreshold            = cms.double(0.)
@@ -31,7 +31,9 @@ caloStage2Params.egMaxPtHOverE          = cms.double(128.)
 caloStage2Params.egMaxHOverELUTFile         = cms.FileInPath("L1Trigger/L1TCalorimeter/data/HoverEIdentification_0.995_v15.12.23.txt")
 caloStage2Params.egHOverEcutBarrel          = cms.int32(3)
 caloStage2Params.egHOverEcutEndcap          = cms.int32(4)
+
 caloStage2Params.egBypassExtHOverE          = cms.uint32(0)
+
 caloStage2Params.egCompressShapesLUTFile    = cms.FileInPath("L1Trigger/L1TCalorimeter/data/egCompressLUT_v4.txt")
 caloStage2Params.egShapeIdType              = cms.string("compressed")
 caloStage2Params.egShapeIdVersion           = cms.uint32(0)
