@@ -229,7 +229,7 @@ void l1t::Stage2Layer2EGammaAlgorithmFirmwareImp1::processEvent(const std::vecto
       int shapeBit  = egammas_raw.at(iEG).hwQual()>>2 & (0x1);
       int hOverEExtBit = egammas_raw.at(iEG).hwQual()>>3 & (0x1);
 
-      bool IDcuts = (fgBit && hOverEBit && shapeBit && hOverEExtBit) || (egammas_raw.at(iEG).pt()>=params_->egMaxPtHOverE()) || (params_->egBypassEGVetos());
+      bool IDcuts = (fgBit && hOverEBit && shapeBit && hOverEExtBit) || (egammas_raw.at(iEG).pt()>=params_->egMaxPtHOverE()) || (params_->egBypassEGVetos() || (abs(egammas_raw.at(iEG).towerIEta()) > 28));
 
       if(!IDcuts) continue;
       egammas_raw.at(iEG).setHwQual( 7 ); //Default value in firmware, not used
